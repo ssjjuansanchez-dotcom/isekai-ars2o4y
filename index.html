@@ -22,17 +22,9 @@
 
     <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
       
-      <!-- DISEÑO DE LA REMERA 1 -->
       <a-marker type="pattern" url="remera1.patt">
-        <a-entity gltf-model="url(diseño1.glb.glb)" scale="0.5 0.5 0.5" position="0 0 0" rotation="0 0 0"></a-entity>
+        <a-entity gltf-model="diseño1.glb.glb" scale="1 1 1" position="0 0 0" rotation="0 0 0"></a-entity>
       </a-marker>
-
-      <!-- Cuando hagas la remera 2, solo vas a borrar las barritas de abajo y poner sus nombres -->
-      <!--
-      <a-marker type="pattern" url="remera2.patt">
-        <a-entity gltf-model="url(diseño2.glb)" scale="0.5 0.5 0.5"></a-entity>
-      </a-marker>
-      -->
 
       <a-entity camera></a-entity>
     </a-scene>
