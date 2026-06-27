@@ -26,13 +26,8 @@
       <button id="btn-video" class="btn-capture" onclick="controlarVideo()">🎥 GRABAR</button>
     </div>
 
-    <!-- Escena AR optimizada para pantalla móvil -->
-    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false; sourceWidth:1280; sourceHeight:720; displayWidth:1280; displayHeight:720;">
-      <a-marker type="pattern" url="remera1.patt">
-        <a-entity gltf-model="diseño1.glb.glb" scale="0.5 0.5 0.5" position="0 0 0" rotation="0 0 0"></a-entity>
-      </a-marker>
-      <a-entity camera></a-entity>
-    </a-scene>
+<!-- Escena AR con buffer preservado para que el 3D salga en las fotos -->
+    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false; sourceWidth:1280; sourceHeight:720; displayWidth:1280; displayHeight:720;" renderer="preserveDrawingBuffer: true;">
 
 <script>
       function capturarFoto() {
