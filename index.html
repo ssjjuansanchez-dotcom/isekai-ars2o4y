@@ -15,14 +15,15 @@
       #btn-video { background-color: #ff4757; color: white; }
     </style>
   </head>
-  <body style="margin: 0; overflow: hidden;">
+  
+  <body>
 
     <div class="ui-container">
       <button id="btn-foto" class="btn-capture" onclick="capturarFoto()">📸 FOTO</button>
       <button id="btn-video" class="btn-capture" onclick="controlarVideo()">🎥 GRABAR</button>
     </div>
 
-    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false; sourceWidth:1280; sourceHeight:720; displayWidth:1280; displayHeight:720;" renderer="antialias: true; preserveDrawingBuffer: true; alpha: true;">
+    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false; sourceWidth:1280; sourceHeight:720; displayWidth:1280; displayHeight:720;" renderer="preserveDrawingBuffer: true; alpha: true;">
       <a-marker type="pattern" url="remera1.patt">
         <a-entity gltf-model="diseño1.glb.glb" scale="0.5 0.5 0.5" position="0 0 0" rotation="0 0 0"></a-entity>
       </a-marker>
@@ -36,8 +37,11 @@
         const scene = document.querySelector('a-scene');
         const video = document.querySelector('video');
         
-        // Esperamos un milisegundo para asegurar que el renderizador esté sincronizado
-        scene.renderer.render(scene.object3D, scene.camera);
+        // Forzamos el renderizado manual antes de leer el canvas
+        if (scene.renderer) {
+          scene.renderer.render(scene.object3D, scene.camera);
+        }
+        
         const canvas3D = scene.renderer.getContext().canvas;
 
         const mergedCanvas = document.createElement('canvas');
@@ -45,15 +49,15 @@
         mergedCanvas.height = canvas3D.height;
         const ctx = mergedCanvas.getContext('2d');
 
-        // 1. Dibujamos el fondo de la cámara real
+        // 1. Dibujamos la cámara de fondo
         if (video) {
           ctx.drawImage(video, 0, 0, mergedCanvas.width, mergedCanvas.height);
         }
 
-        // 2. Dibujamos el modelo 3D encima forzando la lectura del buffer gráfico
+        // 2. Dibujamos el modelo 3D arriba
         ctx.drawImage(canvas3D, 0, 0);
 
-        // 3. Descargamos la foto final
+        // 3. Descargamos la foto
         const link = document.createElement('a');
         link.download = 'JIS_Isekai_AR_' + Date.now() + '.png';
         link.href = mergedCanvas.toDataURL('image/png');
@@ -97,5 +101,5 @@
         }
       }
     </script>
-  </head>
+  </body>
 </html>
