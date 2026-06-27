@@ -34,29 +34,77 @@
       <a-entity camera></a-entity>
     </a-scene>
 
-    <script>
+<script>
       function capturarFoto() {
+        // Ocultamos los botones para que no salgan en la foto
         document.querySelector('.ui-container').style.display = 'none';
-        html2canvas(document.body).then(canvas => {
-          const link = document.createElement('a');
-          link.download = 'JIS_Isekai_AR_' + Date.now() + '.png';
-          link.href = canvas.toDataURL(); link.click();
-          document.querySelector('.ui-container').style.display = 'flex';
-        });
+
+        const scene = document.querySelector('a-scene');
+        const video = document.querySelector('video');
+        const canvas3D = scene.renderer.getContext().canvas;
+
+        // Creamos un lienzo temporal para unir la cámara y el 3D
+        const mergedCanvas = document.createElement('canvas');
+        mergedCanvas.width = canvas3D.width;
+        mergedCanvas.height = canvas3D.height;
+        const ctx = mergedCanvas.getContext('2d');
+
+        // 1. Dibujamos la cámara real de fondo
+        if (video) {
+          ctx.drawImage(video, 0, 0, mergedCanvas.width, mergedCanvas.height);
+        }
+
+        // 2. Dibujamos el personaje 3D encima
+        ctx.drawImage(canvas3D, 0, 0);
+
+        // 3. Descargamos la foto final corregida
+        const link = document.createElement('a');
+        link.download = 'JIS_Isekai_AR_' + Date.now() + '.png';
+        link.href = mergedCanvas.toDataURL('image/png');
+        link.click();
+
+        // Volvemos a mostrar los botones
+        document.querySelector('.ui-container').style.display = 'flex';
       }
+
       let mediaRecorder; let recordedChunks = []; let grabbing = false;
       function controlarVideo() {
         const btn = document.getElementById('btn-video');
         if (!grabbing) {
-          recordedChunks = []; const stream = document.querySelector('canvas').captureStream(30);
-          mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+          recordedChunks = [];
+          
+          // Captura optimizada a 24 FPS para evitar tirones
+          const stream = document.querySelector('canvas').captureStream(24); 
+          
+          let options = { mimeType: 'video/webm;codecs=vp8' };
+          if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+            options = { mimeType: 'video/mp4' };
+          }
+          
+          // Límite de bitrate para que el celular no se asfixie
+          options.videoBitsPerSecond = 1500000; 
+
+          mediaRecorder = new MediaRecorder(stream, options);
           mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunks.push(e.data); };
           mediaRecorder.onstop = () => {
-            const blob = new Blob(recordedChunks, { type: 'video/webm' }); const url = URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = 'JIS_Isekai_AR_' + Date.now() + '.webm'; a.click();
+            const blob = new Blob(recordedChunks, { type: mediaRecorder.mimeType }); 
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); 
+            a.href = url; 
+            a.download = 'JIS_Isekai_AR_' + Date.now() + (options.mimeType.includes('mp4') ? '.mp4' : '.webm'); 
+            a.click();
           };
-          mediaRecorder.start(); grabbing = true; btn.innerText = "🛑 PARAR"; btn.style.backgroundColor = "#2ed573";
-        } else { mediaRecorder.stop(); grabbing = false; btn.innerText = "🎥 GRABAR"; btn.style.backgroundColor = "#ff4757"; }
+          
+          mediaRecorder.start(100); // Graba en bloques chicos para que sea fluido
+          grabbing = true; 
+          btn.innerText = "🛑 PARAR"; 
+          btn.style.backgroundColor = "#2ed573";
+        } else { 
+          mediaRecorder.stop(); 
+          grabbing = false; 
+          btn.innerText = "🎥 GRABAR"; 
+          btn.style.backgroundColor = "#ff4757"; 
+        }
       }
     </script>
   </body>
